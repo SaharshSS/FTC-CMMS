@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.canvas.Canvas;
@@ -30,6 +32,7 @@ import com.acmerobotics.roadrunner.ftc.LynxFirmware;
 import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -368,6 +371,35 @@ public final class MecanumDrive {
             c.strokePolyline(xPoints, yPoints);
         }
     }
+
+    public void followTrajectory(Trajectory trajectory) {
+        // Create the action that will handle following the trajectory
+        FollowTrajectoryAction action = new FollowTrajectoryAction(trajectory);
+
+        // Run the action until it is completed
+        while (action.run(telemetry)) {
+            // You can add additional telemetry or logging here if you want to track progress
+            telemetry.addData("Current Pose", localizer.getPose());
+            telemetry.addData("Target Pose", trajectory.end());
+            telemetry.update();
+
+            // Optionally add a small delay or check for a stop condition
+            // sleep(10);  // If you want to control the loop rate, otherwise it will run as fast as possible
+        }
+
+        // Once the trajectory is finished, you may want to stop the motors or perform additional tasks
+        stopMotors();
+    }
+
+    // This method stops the robot's motors, depending on how you are controlling them
+    private void stopMotors() {
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+    }
+
+
 
     public final class TurnAction implements Action {
         private final TimeTurn turn;
